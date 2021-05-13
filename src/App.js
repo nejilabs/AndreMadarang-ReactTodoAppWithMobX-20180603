@@ -25,13 +25,30 @@ class App extends Component {
               <div className="todo-item" key={todo.id}>
                 <div className="todo-item-left">
                   <input type="checkbox" onChange={(event) => this.checkTodo(todo, index, event)} />
-                  {/* <div className={'todo-item-label' + (todo.completed ? ' completed' : '')}>{todo.title}  </div> */}
-                  <div
-                    className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
-                    onDoubleClick={(event) => this.editTodo(todo, index, event)}
-                  >
-                    {todo.title}
-                  </div>
+
+                  {todo.editing ? (
+                    <input
+                      type="text"
+                      className="todo-item-edit"
+                      onDoubleClick={(event) => this.doneEditTodo(todo, index, event)}
+                      onKeyUp={(event) => {
+                        if (event.key === "Enter") {
+                          this.doneEditTodo(todo, index, event)
+                        } else if (event.key === "Escape") {
+                          this.cancelEditTodo(todo, index, event)
+                        }
+                      }}
+                      defaultValue={todo.title}
+                      autoFocus
+                    />
+                  ) : (
+                    <div
+                      className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
+                      onDoubleClick={(event) => this.editTodo(todo, index, event)}
+                    >
+                      {todo.title}
+                    </div>
+                  )}
                 </div>
                 <div className="remove-item" onClick={() => this.deleteTodo(index)}>
                   &times;
@@ -89,7 +106,7 @@ class App extends Component {
         'editing': false,
       },
     ],
-    todoId: 3
+    todoId: 3,
   }
   todoInput = React.createRef();
   // END: STATES
@@ -106,11 +123,10 @@ class App extends Component {
     if (event.key === 'Enter') {
       const todoInput = this.todoInput.current.value;
 
-      //Start: if input value is empty, do not add
+      //if input value is empty, do not add
       if (todoInput.trim().length === 0) {
         return;
       }
-      //End--
 
       // Start: Add new todo to todos for display
       this.setState((prevState, props) => {
@@ -154,11 +170,11 @@ class App extends Component {
   }
   // END: deleteTodo()
 
-  // /**
-  //  * @name checkTodo()
-  //  * @description checks unchecks a todo
-  //  * @param todo, index
-  //  */
+  /**
+   * @name checkTodo()
+   * @description checks unchecks a todo
+   * @param todo, index
+   */
   checkTodo = (todo, index, event) => {
     todo.completed = !todo.completed;
     this.setState((prevState, props) => {
@@ -168,6 +184,57 @@ class App extends Component {
     });
   }
   // // END: checkTodo()
+
+  /**
+ * @name editTodo()
+ * @description edits a todo
+ * @param todo, index
+ */
+  editTodo = (todo, index, event) => {
+    todo.editing = true;
+
+    this.setState((prevState, props) => {
+      let todos = prevState.todos;
+      todos.splice(index, 1, todo);
+
+      return { todos };
+    });
+  }
+  // END: editTodo()
+
+  /**
+* @name doneEditTodo()
+* @description updates todo after pressing "Enter"
+* @param todo, index, event
+*/
+  doneEditTodo = (todo, index, event) => {
+    event.persist();
+    todo.editing = false;
+    todo.title = event.target.value;
+
+    this.setState((prevState, props) => {
+      let todos = prevState.todos;
+      todos.splice(index, 1, todo);
+      return { todos };
+    });
+
+  }
+  // END: doneEditTodo()
+
+  /**
+* @name cancelEditTodo()
+* @description cancel updating todo after pressing "Escape"
+* @param todo, index, event
+*/
+  cancelEditTodo = (todo, index, event) => {
+    this.setState((prevState, props) => {
+      let todos = prevState.todos;
+      todo.editing = false;
+      todos.splice(index, 1, todo);
+      return { todos };
+    });
+  }
+  // END: cancelEditTodo()
 
   // END: METHODS
 
