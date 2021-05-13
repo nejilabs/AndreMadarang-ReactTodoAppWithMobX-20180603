@@ -2,8 +2,13 @@ import React, { Component } from 'react';
 import './App.css';
 import logo from './logo.svg';
 
-import * as classnames from 'classnames';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
+
+import TodosRemaining from './components/TodosRemaining';
+import TodoItem from './components/TodoItem';
+import TodosCheckAll from './components/TodosCheckAll';
+import TodosFiltered from './components/TodosFiltered';
+import TodosClearCompleted from './components/TodosClearCompleted';
 
 class App extends Component {
   // START: TEMPLATE
@@ -29,38 +34,16 @@ class App extends Component {
           >
             {this.filteredTodos().map((todo, index) => {
               return (
-                <div className="todo-item" key={todo.id}>
-                  <div className="todo-item-left">
-                    <input type="checkbox" onChange={(event) => this.checkTodo(todo, index, event)} checked={todo.completed} />
-
-                    {todo.editing ? (
-                      <input
-                        type="text"
-                        className="todo-item-edit"
-                        onDoubleClick={(event) => this.doneEditTodo(todo, index, event)}
-                        onKeyUp={(event) => {
-                          if (event.key === "Enter") {
-                            this.doneEditTodo(todo, index, event)
-                          } else if (event.key === "Escape") {
-                            this.cancelEditTodo(todo, index, event)
-                          }
-                        }}
-                        defaultValue={todo.title}
-                        autoFocus
-                      />
-                    ) : (
-                      <div
-                        className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
-                        onDoubleClick={(event) => this.editTodo(todo, index, event)}
-                      >
-                        {todo.title}
-                      </div>
-                    )}
-                  </div>
-                  <div className="remove-item" onClick={() => this.deleteTodo(index)}>
-                    &times;
-                </div>
-                </div>
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  index={index}
+                  checkTodo={this.checkTodo}
+                  doneEditTodo={this.doneEditTodo}
+                  cancelEditTodo={this.cancelEditTodo}
+                  deleteTodo={this.deleteTodo}
+                  editTodo={this.editTodo}
+                />
               )
             })}
           </ReactCSSTransitionGroup>
@@ -69,8 +52,8 @@ class App extends Component {
 
           {/* START: Select All and Item Remaining Counter */}
           <div className="extra-container">
-            <div><label><input type="checkbox" checked={this.remainingTodosCount() === 0} onChange={(event) => this.checkAllTodos(event)} /> Check All</label></div>
-            <div>{this.remainingTodosCount()} items left</div>
+            <TodosCheckAll remainingTodosCount={this.remainingTodosCount} checkAllTodos={this.checkAllTodos} />
+            <TodosRemaining remaining={this.remainingTodosCount()} />
           </div>
           {/* END: Select All and Item Remaining Counter */}
 
@@ -78,11 +61,7 @@ class App extends Component {
           {/* START: Extra Buttons */}
           <div className="extra-container">
             {/* Start: Filter Buttons */}
-            <div>
-              <button className={classnames({ 'active': this.state.filter === 'all' })} onClick={() => this.updateFilter('all')}>All</button>
-              <button className={classnames({ 'active': this.state.filter === 'active' })} onClick={() => this.updateFilter('active')}>Active</button>
-              <button className={classnames({ 'active': this.state.filter === 'completed' })} onClick={() => this.updateFilter('completed')}>Completed</button>
-            </div>
+            <TodosFiltered filter={this.state.filter} updateFilter={this.updateFilter} />
             {/* End: Filter Buttons */}
 
 
@@ -93,9 +72,7 @@ class App extends Component {
                 transitionEnterTimeout={300}
                 transitionLeaveTimeout={300}
               >
-                <div>
-                  <button onClick={() => this.clearCompletedTodos()}>Clear Completed</button>
-                </div>
+                <TodosClearCompleted clearCompletedTodos={this.clearCompletedTodos} />
               </ReactCSSTransitionGroup>
 
             }
