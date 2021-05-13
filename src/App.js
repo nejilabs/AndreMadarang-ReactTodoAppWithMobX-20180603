@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import logo from './logo.svg';
+
 import * as classnames from 'classnames';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 
 class App extends Component {
   // START: TEMPLATE
@@ -20,48 +22,54 @@ class App extends Component {
           <input type="text" className="todo-input" placeholder="What needs to be done" onKeyUp={this.addTodo} ref={this.todoInput} />
 
           {/* Start: Display Todos */}
-          {this.filteredTodos().map((todo, index) => {
-            return (
-              <div className="todo-item" key={todo.id}>
-                <div className="todo-item-left">
-                  <input type="checkbox" onChange={(event) => this.checkTodo(todo, index, event)} />
+          <ReactCSSTransitionGroup
+            transitionName="fade"
+            transitionEnterTimeout={300}
+            transitionLeaveTimeout={300}
+          >
+            {this.filteredTodos().map((todo, index) => {
+              return (
+                <div className="todo-item" key={todo.id}>
+                  <div className="todo-item-left">
+                    <input type="checkbox" onChange={(event) => this.checkTodo(todo, index, event)} checked={todo.completed} />
 
-                  {todo.editing ? (
-                    <input
-                      type="text"
-                      className="todo-item-edit"
-                      onDoubleClick={(event) => this.doneEditTodo(todo, index, event)}
-                      onKeyUp={(event) => {
-                        if (event.key === "Enter") {
-                          this.doneEditTodo(todo, index, event)
-                        } else if (event.key === "Escape") {
-                          this.cancelEditTodo(todo, index, event)
-                        }
-                      }}
-                      defaultValue={todo.title}
-                      autoFocus
-                    />
-                  ) : (
-                    <div
-                      className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
-                      onDoubleClick={(event) => this.editTodo(todo, index, event)}
-                    >
-                      {todo.title}
-                    </div>
-                  )}
+                    {todo.editing ? (
+                      <input
+                        type="text"
+                        className="todo-item-edit"
+                        onDoubleClick={(event) => this.doneEditTodo(todo, index, event)}
+                        onKeyUp={(event) => {
+                          if (event.key === "Enter") {
+                            this.doneEditTodo(todo, index, event)
+                          } else if (event.key === "Escape") {
+                            this.cancelEditTodo(todo, index, event)
+                          }
+                        }}
+                        defaultValue={todo.title}
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
+                        onDoubleClick={(event) => this.editTodo(todo, index, event)}
+                      >
+                        {todo.title}
+                      </div>
+                    )}
+                  </div>
+                  <div className="remove-item" onClick={() => this.deleteTodo(index)}>
+                    &times;
                 </div>
-                <div className="remove-item" onClick={() => this.deleteTodo(index)}>
-                  &times;
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </ReactCSSTransitionGroup>
           {/* End: Display Todos */}
 
 
           {/* START: Select All and Item Remaining Counter */}
           <div className="extra-container">
-            <div><label><input type="checkbox" /> Check All</label></div>
+            <div><label><input type="checkbox" checked={this.remainingTodosCount() === 0} onChange={(event) => this.checkAllTodos(event)} /> Check All</label></div>
             <div>{this.remainingTodosCount()} items left</div>
           </div>
           {/* END: Select All and Item Remaining Counter */}
@@ -80,9 +88,16 @@ class App extends Component {
 
             {/* Start: Clear Completed Button */}
             {this.completedTodosCount() > 0 &&
-              <div>
-                <button onClick={() => this.clearCompletedTodos()}>Clear Completed</button>
-              </div>
+              <ReactCSSTransitionGroup
+                transitionName="fade"
+                transitionEnterTimeout={300}
+                transitionLeaveTimeout={300}
+              >
+                <div>
+                  <button onClick={() => this.clearCompletedTodos()}>Clear Completed</button>
+                </div>
+              </ReactCSSTransitionGroup>
+
             }
             {/* End: Clear Completed Button */}
 
@@ -307,6 +322,22 @@ class App extends Component {
   }
   // END: clearCompletedTodos()
 
+  /**
+* @name checkAllTodos()
+* @description Select all Todos
+* @param todo, index, event
+*/
+  checkAllTodos = (event) => {
+    event.persist();
+
+    this.setState((prevState, props) => {
+      let todos = prevState.todos;
+      todos.forEach(todo => todo.completed = event.target.checked)
+      return { todos };
+    });
+
+  }
+  // END: checkAllTodos()
 
 
 
