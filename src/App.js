@@ -20,7 +20,7 @@ class App extends Component {
           <input type="text" className="todo-input" placeholder="What needs to be done" onKeyUp={this.addTodo} ref={this.todoInput} />
 
           {/* Start: Display Todos */}
-          {this.state.todos.map((todo, index) => {
+          {this.filteredTodos().map((todo, index) => {
             return (
               <div className="todo-item" key={todo.id}>
                 <div className="todo-item-left">
@@ -62,24 +62,31 @@ class App extends Component {
           {/* START: Select All and Item Remaining Counter */}
           <div className="extra-container">
             <div><label><input type="checkbox" /> Check All</label></div>
-            <div>remaining items left</div>
+            <div>{this.remainingTodosCount()} items left</div>
           </div>
           {/* END: Select All and Item Remaining Counter */}
 
 
           {/* START: Extra Buttons */}
           <div className="extra-container">
+            {/* Start: Filter Buttons */}
             <div>
-              <button >All</button>
-              <button>Active</button>
-              <button >Completed</button>
+              <button className={classnames({ 'active': this.state.filter === 'all' })} onClick={() => this.updateFilter('all')}>All</button>
+              <button className={classnames({ 'active': this.state.filter === 'active' })} onClick={() => this.updateFilter('active')}>Active</button>
+              <button className={classnames({ 'active': this.state.filter === 'completed' })} onClick={() => this.updateFilter('completed')}>Completed</button>
             </div>
+            {/* End: Filter Buttons */}
 
-            <div>
-              {/* <transition name="fade"> */}
-              <button >Clear Completed</button>
-              {/* </transition> */}
-            </div>
+
+            {/* Start: Clear Completed Button */}
+            {this.completedTodosCount() > 0 &&
+              <div>
+                <button onClick={() => this.clearCompletedTodos()}>Clear Completed</button>
+              </div>
+            }
+            {/* End: Clear Completed Button */}
+
+
           </div>
           {/* END: Extra Buttons */}
         </div>
@@ -107,9 +114,59 @@ class App extends Component {
       },
     ],
     todoId: 3,
+    filter: ''
   }
   todoInput = React.createRef();
   // END: STATES
+
+  // START: COMPUTED
+  /**
+* @name remainingTodosCount()
+* @description counts remaining items
+* @param 
+*/
+  remainingTodosCount = () => {
+    return this.state.todos.filter(todo => !todo.completed).length
+  }
+  // END: remainingTodosCount()
+
+
+  /**
+* @name completedTodosCount()
+* @description counts completed items
+* @param 
+*/
+  completedTodosCount = () => {
+    return this.state.todos.filter(todo => todo.completed).length
+  }
+  // END: completedTodosCount()
+
+  /**
+* @name updateFilter()
+* @description counts completed items
+* @param 
+*/
+  updateFilter = filter => {
+    this.setState({ filter: filter })
+  }
+
+  /**
+* @name filteredTodos()
+* @description filtered todo data
+* @param 
+*/
+  filteredTodos = () => {
+    if (this.state.filter === 'all') {
+      return this.state.todos;
+    } else if (this.state.filter === 'active') {
+      return this.state.todos.filter(todo => !todo.completed);
+    } else if (this.state.filter === 'completed') {
+      return this.state.todos.filter(todo => todo.completed);
+    }
+    return this.state.todos;
+  }
+  // END: filteredTodos()
+  // END: COMPUTED
 
 
   // START: METHODS
@@ -235,6 +292,24 @@ class App extends Component {
     });
   }
   // END: cancelEditTodo()
+
+  /**
+* @name clearCompletedTodos()
+* @description clears completed todos
+* @param 
+*/
+  clearCompletedTodos = () => {
+    this.setState((prevState, props) => {
+      return { todos: prevState.todos.filter((todo) => !todo.completed) }
+    }
+    );
+
+  }
+  // END: clearCompletedTodos()
+
+
+
+
 
   // END: METHODS
 
