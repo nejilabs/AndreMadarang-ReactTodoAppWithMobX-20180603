@@ -1,63 +1,53 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
+import PropTypes from 'prop-types';
 import * as classnames from 'classnames';
+import { inject, observer } from 'mobx-react';
 
+const TodoItem = inject('TodoStore')(observer(props => {
+  const TodoStore = props.TodoStore;
 
-const TodoItem = ({
-  todo,
-  index,
-  checkTodo,
-  doneEditTodo,
-  cancelEditTodo,
-  deleteTodo,
-  editTodo
-}) => {
   return (
+    <div>
+      <div key={props.todo.id} className="todo-item">
+        <div className="todo-item-left">
+          <input type="checkbox" onChange={(event) => TodoStore.checkTodo(props.todo, event)} checked={props.todo.completed} />
 
-    <div className="todo-item">
-      <div className="todo-item-left">
-        <input type="checkbox" onChange={(event) => checkTodo(todo, index, event)} checked={todo.completed} />
+          {!props.todo.editing &&
+            <div
+              className={classnames({ 'todo-item-label': true, 'completed': props.todo.completed })}
+              onDoubleClick={(event) => TodoStore.editTodo(props.todo, event)}
+            >
+              {props.todo.title}
+            </div>
+          }
 
-        {todo.editing ? (
-          <input
-            type="text"
-            className="todo-item-edit"
-            onDoubleClick={(event) => doneEditTodo(todo, index, event)}
-            onKeyUp={(event) => {
-              if (event.key === "Enter") {
-                doneEditTodo(todo, index, event)
-              } else if (event.key === "Escape") {
-                cancelEditTodo(todo, index, event)
-              }
-            }}
-            defaultValue={todo.title}
-            autoFocus
-          />
-        ) : (
-          <div
-            className={classnames({ 'todo-item-label': true, 'completed': todo.completed })}
-            onDoubleClick={(event) => editTodo(todo, index, event)}
-          >
-            {todo.title}
-          </div>
-        )}
+          {props.todo.editing &&
+            <input
+              className="todo-item-edit" type="text" autoFocus
+              defaultValue={props.todo.title}
+              onBlur={(event) => TodoStore.doneEditTodo(props.todo, event)}
+              onKeyUp={(event) => {
+                if (event.key === 'Enter') {
+                  TodoStore.doneEditTodo(props.todo, event);
+                } else if (event.key === 'Escape') {
+                  TodoStore.cancelEditTodo(props.todo, event);
+                }
+              }}
+            />
+          }
+
+        </div>
+        <div className="remove-item" onClick={(event) => TodoStore.deleteTodo(props.todo.id)}>
+          &times;
+        </div>
       </div>
-      <div className="remove-item" onClick={() => deleteTodo(index)}>
-        &times;
-                </div>
     </div>
+  );
+}));
 
-  )
-}
-
-TodoItem.propTypes = {
+TodoItem.wrappedComponent.propTypes = {
   todo: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired,
-  checkTodo: PropTypes.func.isRequired,
-  doneEditTodo: PropTypes.func.isRequired,
-  cancelEditTodo: PropTypes.func.isRequired,
-  deleteTodo: PropTypes.func.isRequired,
-  editTodo: PropTypes.func.isRequired
-}
+  TodoStore: PropTypes.object.isRequired,
+};
 
-export default TodoItem
+export default TodoItem;

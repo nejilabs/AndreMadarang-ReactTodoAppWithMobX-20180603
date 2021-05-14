@@ -4,12 +4,20 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Start: MobX
+import { Provider } from 'mobx-react';
+import TodoStore from './store/TodoStore'
+
+// End: MobX
+
+
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider TodoStore={TodoStore}>
     <App />
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
 );
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
